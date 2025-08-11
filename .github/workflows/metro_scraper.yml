@@ -32,31 +32,10 @@ jobs:
       - name: Scraper ausführen
         run: python metro_news_scraper_enriched.py
 
-      - name: Dateien auflisten (Diagnose)
+      - name: Dateien auflisten
         run: ls -la
 
-      - name: CSV prüfen
-        run: |
-          if [ ! -f metro_news.csv ]; then
-            echo "metro_news.csv wurde nicht erzeugt."
-            exit 1
-          fi
-          head -n 5 metro_news.csv || true
-
-      - name: CSV in data/ ablegen (Snapshot + latest)
-        run: |
-          mkdir -p data
-          DATE=$(date -u +%Y%m%d)
-          cp metro_news.csv "data/metro_news_${DATE}.csv"
-          cp metro_news.csv "data/latest.csv"
-
-      - name: CSV committen & pushen
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update metro news CSV"
-          file_pattern: "data/*.csv"
-
-      - name: CSV zusätzlich als Artifact hochladen
+      - name: CSV als Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
           name: metro_news_csv
