@@ -1,0 +1,26 @@
+name: Metro Scraper
+
+on:
+  schedule:
+    # Läuft täglich um 08:00 UTC (09:00 deutsche Zeit im Winter, 10:00 im Sommer)
+    - cron: "0 8 * * *"
+  workflow_dispatch:  # erlaubt manuelles Auslösen
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Repository auschecken
+      uses: actions/checkout@v3
+
+    - name: Python einrichten
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Abhängigkeiten installieren
+      run: pip install -r requirements.txt
+
+    - name: Skript ausführen
+      run: python metro_news_scraper_enriched.py
