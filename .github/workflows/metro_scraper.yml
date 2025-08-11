@@ -1,41 +1,43 @@
-name: Metro Scraper
-
-permissions:
-  contents: write   # erlaubt Push ins Repo
+name: Metro Scraper (Artifact only)
 
 on:
+  workflow_dispatch:        # manuell starten
   schedule:
     - cron: "0 8 * * *"     # täglich 08:00 UTC
-  workflow_dispatch:         # manueller Start möglich
 
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository auschecken
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
 
-      - name: Python einrichten
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Abhängigkeiten installieren
+      - name: Install deps
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
 
-      - name: Scraper ausführen
+      - name: Run scraper
         run: python metro_news_scraper_enriched.py
 
-      - name: Dateien auflisten
+      - name: List files (diagnose)
         run: ls -la
 
-      - name: CSV als Artifact hochladen
+      # Fallback: lege leere CSV an, falls der Scraper keine erzeugt hat
+      - name: Ensure CSV exists
+        run: |
+          if [ ! -f metro_news.csv ]; then
+            echo "Datum,Quelle,Titel,Link,Land,Stadt,Projekttyp,Status,Details" > metro_news.csv
+            echo "WARN: metro_news.csv wurde vom Scraper nicht erzeugt; leere Datei angelegt."
+          fi
+
+      - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
         with:
           name: metro_news_csv
