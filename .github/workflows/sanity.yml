@@ -1,0 +1,23 @@
+name: Sanity Commit Test
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: true, fetch-depth: 0 }
+
+      - name: Erzeuge Testdatei
+        run: |
+          mkdir -p data
+          echo "hello $(date -u)" > data/hello.txt
+          ls -la data
+
+      - name: Commit & Push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "test: sanity commit"
+          file_pattern: "data/hello.txt"
