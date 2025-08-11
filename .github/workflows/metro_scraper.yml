@@ -1,44 +1,35 @@
 name: Metro Scraper
 
-# << Root-Ebene >>
-permissions:
-  contents: write   # erlaubt dem Workflow, ins Repo zu schreiben
-
 on:
   schedule:
-    - cron: "0 8 * * *"   # täglich 08:00 UTC
-  workflow_dispatch:       # manuell startbar
+    # Läuft täglich um 08:00 UTC (09:00 deutsche Zeit im Winter, 10:00 im Sommer)
+    - cron: "0 8 * * *"
+  workflow_dispatch: # erlaubt manuelles Auslösen
+
+permissions:
+  contents: write   # erlaubt es, ins Repo zu schreiben
 
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
     steps:
       - name: Repository auschecken
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v3
       - name: Python einrichten
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
-
+          python-version: "3.11"
       - name: Abhängigkeiten installieren
-        run: |
-          python -m pip install -U pip
-          pip install -r requirements.txt
-
+        run: pip install -r requirements.txt
       - name: Skript ausführen
         run: python metro_news_scraper_enriched.py
-
-      - name: CSV in data/ ablegen (Snapshot + latest)
+      - name: Änderungen committen
         run: |
-          mkdir -p data
-          DATE=$(date -u +%Y%m%d)
-          cp metro_news.csv data/metro_news_${DATE}.csv
-          cp metro_news.csv data/latest.csv
-
-      - name: CSV committen & pushen
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update metro news CSV"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add metro_news.csv
+          git commit -m "Automatische Aktualisierung der CSV"
+          git push
+hore: update metro news CSV"
           file_pattern: "data/*.csv"
           # optional: branch: main
