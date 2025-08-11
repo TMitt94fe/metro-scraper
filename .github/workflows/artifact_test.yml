@@ -1,0 +1,18 @@
+name: Artifact Test
+on:
+  workflow_dispatch:  # manueller Start
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy-Datei erzeugen
+        run: |
+          echo "hello $(date -u)" > hello.txt
+          ls -la
+
+      - name: Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-artifact
+          path: hello.txt
